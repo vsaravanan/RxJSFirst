@@ -56,13 +56,25 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	// to override the console log
+	function mylog(txt) {
+		(0, _jquery2.default)('#root').append(txt + '<br>');
+	}
+
+	var console = {};
+	console.log = function (msg) {
+		mylog(msg);
+	};
+
+	console.log('');
+
 	var btn = (0, _jquery2.default)('#btn');
 	var input = (0, _jquery2.default)('#input');
 
 	var btnStream$ = _Rx2.default.Observable.fromEvent(btn, 'click');
 
 	btnStream$.subscribe(function (e) {
-		console.log(e.target.innerHTML);
+		console.log(e.target.innerHTML); // display button name
 	}, function (err) {
 		console.log(err);
 	}, function () {
@@ -72,12 +84,242 @@
 	var numbers = [33, 44, 55, 66, 77, 88];
 	var number$ = _Rx2.default.Observable.from(numbers);
 
+	console.log('Please refer full syntax at my github :');
+	console.log(JSON.stringify('<a href=https://github.com/vsaravanan/RxJSFirst/blob/master/src/app.js> https://github.com/vsaravanan/RxJSFirst/blob/master/src/app.js </a>'));
+	console.log('');
+
+	console.log('Lesson 1 : display from array [33, 44, 55, 66, 77, 88]');
+	console.log('const number$ = Rx.Observable.from(numbers);');
+	console.log('number$.subscribe()');
+
 	number$.subscribe(function (v) {
 		console.log(v);
 	}, function (err) {
 		console.log(err);
 	}, function (complete) {
 		console.log('Completed');
+	});
+
+	console.log('');
+
+	console.log('Lesson 2 : json data posts');
+	console.log('const posts$ = Rx.Observable.from(posts);');
+
+	var posts = [{ title: 'Post 1', body: 'Post one body' }, { title: 'Post 2', body: 'Post two body' }, { title: 'Post 3', body: 'Post three body' }];
+
+	//const postOutput = $('#posts');
+	var posts$ = _Rx2.default.Observable.from(posts);
+
+	posts$.subscribe(function (post) {
+		//console.log(post);
+		(0, _jquery2.default)('#posts').append('<li><h3>' + post.title + '</h3><p>' + post.body + '</p></li>');
+	}, function (err) {
+		console.log(err);
+	}, function (complete) {
+		console.log('Completed');
+	});
+
+	console.log('');
+
+	console.log('Lesson 3 : new Rx.Observable(observer => {} )');
+	console.log('observer =>  { observer.next() } ');
+
+	var source$ = new _Rx2.default.Observable(function (observer) {
+		console.log('Creating Observable');
+		observer.next('Hello world');
+		observer.next('Another value');
+
+		observer.error(new Error('Error: something went wrong'));
+
+		setTimeout(function () {
+			observer.next('after 3 seconds');
+			observer.complete();
+		}, 3000);
+	});
+
+	source$.catch(function (err) {
+		return _Rx2.default.Observable.of(err);
+	}).subscribe(function (x) {
+		console.log(x);
+	}, function (err) {
+		console.log(err);
+	}, function (complete) {
+		console.log('Completed after 3 seconds');
+	});
+
+	console.log('');
+
+	console.log('Lesson 4 : myPromise = new Promise((resolve, reject) => { })');
+	console.log('Rx.Observable.fromPromise(myPromise); ');
+
+	var myPromise = new Promise(function (resolve, reject) {
+		console.log('Creating promise');
+		setTimeout(function () {
+			resolve('Promise successfully resolved after 3 seconds');
+		}, 3000);
+	});
+
+	// this is normal method
+	//myPromise.then( x => {
+	//	console.log(x);
+	//});
+
+	var source2$ = _Rx2.default.Observable.fromPromise(myPromise);
+	source2$.subscribe(function (x) {
+		return console.log(x);
+	});
+
+	console.log('');
+
+	console.log('Lesson 5 : myPromise with ajax data');
+	console.log(' return $.ajax({ url: }).promise() ');
+
+	function getUser(username) {
+		return _jquery2.default.ajax({
+			url: 'https://api.github.com/users/' + username,
+			dataType: 'jsonp'
+		}).promise();
+	}
+
+	// bradtraversy
+
+	_Rx2.default.Observable.fromPromise(getUser('bradtraversy')) //e.target.value
+	.map(function (user) {
+		return user.data.name;
+	}).subscribe(function (name) {
+		console.log('name : ' + name);
+		console.log('but it will be slow and print at the bottom');
+	});
+
+	//const inputSource$ = Rx.Observable.fromEvent($('#input'), 'keyup')
+
+	/*
+	inputSource$.subscribe(e => {
+		Rx.Observable.fromPromise(getUser(e.target.value))  //e.target.value
+		.subscribe(x => {
+			console.log(x.data);
+			$('#name').text(x.data.name);
+			$('#blog').text(x.data.blog);
+			$('#repos').text('Public Repos : ' + x.data.public_repos);
+		});
+
+	});
+	*/
+
+	// try various methods below
+	//const source3$ = Rx.Observable.interval(100).take(5);
+	//const source3$ = Rx.Observable.timer(5000,2000).take(5);
+	//const source3$ = Rx.Observable.range(25,32);
+	//const source3$ = Rx.Observable.interval(100).take(10)
+	//	.map(v => v * 2);
+
+
+	var source3$ = _Rx2.default.Observable.from(['John', 'Tom', 'Shawn']).map(function (v) {
+		return v.toUpperCase();
+	}).map(function (v) {
+		return 'I am ' + v;
+	});
+
+	source3$.subscribe(function (x) {
+		return console.log(x);
+	}, function (err) {
+		console.log(err);
+	}, function (complete) {
+		console.log('Completed');
+	});
+
+	console.log('');
+	console.log("Lesson 6 : x.Observable.from(users).pluck('age');");
+
+	var users = [{ name: 'Will', age: 33 }, { name: 'Mike', age: 34 }, { name: 'Paul', age: 35 }];
+
+	var users$ = _Rx2.default.Observable.from(users).pluck('age');
+
+	users$.subscribe(function (x) {
+		return console.log(x);
+	});
+
+	console.log('');
+	console.log('Lesson 7 : Rx.Observable.of() merge ... ');
+
+	_Rx2.default.Observable.of('Hello').merge(_Rx2.default.Observable.of('Everyone')).subscribe(function (x) {
+		return console.log(x);
+	});
+
+	//Rx.Observable.interval(2000)
+	//	.merge(Rx.Observable.interval(500))
+	//	.take(10)
+	//	.subscribe(x => console.log(x))
+	//;
+	//
+	console.log('');
+	console.log('Lesson 8 : Rx.Observable.range(0,5).map(v => \'Range1: \' + v) ');
+	console.log('Rx.Observable.concat()');
+
+	var source6$ = _Rx2.default.Observable.range(0, 5).map(function (v) {
+		return 'Range1: ' + v;
+	});
+	var source7$ = _Rx2.default.Observable.range(6, 5).map(function (v) {
+		return 'Range2: ' + v;
+	});
+
+	_Rx2.default.Observable.concat(source6$, source7$).subscribe(function (x) {
+		return console.log(x);
+	});
+
+	console.log('');
+	console.log('Lesson 9 : Rx.Observable.of().subscribe() ');
+
+	_Rx2.default.Observable.of('Hello').subscribe(function (v) {
+		_Rx2.default.Observable.of(v + 'Everyone').subscribe(function (x) {
+			return console.log(v + x);
+		});
+	});
+
+	console.log('');
+	console.log('Lesson 10 : Rx.Observable.of().mergeMap() ');
+
+	_Rx2.default.Observable.of('Hello').mergeMap(function (v) {
+		return _Rx2.default.Observable.of(v + 'Everyone');
+	}).subscribe(function (x) {
+		return console.log(x);
+	}); // v is not accessible here
+	;
+
+	console.log('');
+	console.log('Lesson 11 : Rx.Observable.interval(2000).map(v => \'Merge1: \' + v) ');
+
+	var source4$ = _Rx2.default.Observable.interval(2000).map(function (v) {
+		return 'Merge1: ' + v;
+	});
+	var source5$ = _Rx2.default.Observable.interval(2000).map(function (v) {
+		return 'Merge2: ' + v;
+	});
+
+	_Rx2.default.Observable.merge(source4$, source5$).take(15).subscribe(function (x) {
+		return console.log(x);
+	});
+
+	// bradtraversy
+
+	console.log('');
+
+	console.log(' to test Lesson 12 type bradtraversy in input box');
+	console.log('switchMap ');
+
+	console.log('');
+
+	var inputSource2$ = _Rx2.default.Observable.fromEvent((0, _jquery2.default)('#input'), 'keyup').map(function (e) {
+		return e.target.value;
+	}).switchMap(function (v) {
+		return _Rx2.default.Observable.fromPromise(getUser(v));
+	});
+
+	inputSource2$.subscribe(function (x) {
+		console.log('**********' + x.data.blog);
+		(0, _jquery2.default)('#name').text(x.data.name);
+		(0, _jquery2.default)('#blog').text(x.data.blog);
+		(0, _jquery2.default)('#repos').text('Public Repos : ' + x.data.public_repos);
 	});
 
 	//const inputStream$ =  Rx.Observable.fromEvent(input,'keyup');
@@ -112,180 +354,28 @@
 	//);
 	// 
 
+	// var printlog = function () {
 
-	var posts = [{ title: 'Post 1', body: 'Post one body' }, { title: 'Post 2', body: 'Post two body' }, { title: 'Post 3', body: 'Post three body' }];
+	// 	this.log = function (msg) {
+	// 		mylog(msg);
+	// 	}
 
-	//const postOutput = $('#posts');
-	var posts$ = _Rx2.default.Observable.from(posts);
+	// }
 
-	posts$.subscribe(function (post) {
-		console.log(post);
-		(0, _jquery2.default)('#posts').append('<li><h3>' + post.title + '</h3><p>' + post.body + '</p></li>');
-	}, function (err) {
-		console.log(err);
-	}, function (complete) {
-		console.log('Completed');
-	});
+	// var m = new printlog();
+	// m.log('fdff....');
 
-	var source$ = new _Rx2.default.Observable(function (observer) {
-		console.log('Creating Observable');
-		observer.next('Hello world');
-		observer.next('Another value');
+	// var print2log = function () {
 
-		observer.error(new Error('Error: something went wrong'));
+	// 	var log = function(msg) {
+	// 		mylog(msg);
+	// 	}
+	// 	return {log} ;
 
-		setTimeout(function () {
-			observer.next('Yet another');
-			observer.complete();
-		}, 3000);
-	});
+	// };
 
-	source$.catch(function (err) {
-		return _Rx2.default.Observable.of(err);
-	}).subscribe(function (x) {
-		console.log(x);
-	}, function (err) {
-		console.log(err);
-	}, function (complete) {
-		console.log('Completed');
-	});
-
-	var myPromise = new Promise(function (resolve, reject) {
-		console.log('Creating promise');
-		setTimeout(function () {
-			resolve('Promise successfully resolved');
-		}, 3000);
-	});
-
-	//myPromise.then( x => {
-	//	console.log(x);
-	//});
-
-	var source2$ = _Rx2.default.Observable.fromPromise(myPromise);
-	source2$.subscribe(function (x) {
-		return console.log(x);
-	});
-
-	function getUser(username) {
-		return _jquery2.default.ajax({
-			url: 'https://api.github.com/users/' + username,
-			dataType: 'jsonp'
-		}).promise();
-	}
-
-	// bradtraversy
-
-	_Rx2.default.Observable.fromPromise(getUser('bradtraversy')) //e.target.value
-	.map(function (user) {
-		return user.data.name;
-	}).subscribe(function (name) {
-		console.log(name);
-	});
-
-	//const inputSource$ = Rx.Observable.fromEvent($('#input'), 'keyup')
-
-	/*
-	inputSource$.subscribe(e => {
-		Rx.Observable.fromPromise(getUser(e.target.value))  //e.target.value
-		.subscribe(x => {
-			console.log(x.data);
-			$('#name').text(x.data.name);
-			$('#blog').text(x.data.blog);
-			$('#repos').text('Public Repos : ' + x.data.public_repos);
-		});
-
-	});
-	*/
-
-	//const source3$ = Rx.Observable.interval(100).take(5);
-	//const source3$ = Rx.Observable.timer(5000,2000).take(5);
-	//const source3$ = Rx.Observable.range(25,32);
-	//const source3$ = Rx.Observable.interval(100).take(10)
-	//	.map(v => v * 2);
-
-	var source3$ = _Rx2.default.Observable.from(['John', 'Tom', 'Shawn']).map(function (v) {
-		return v.toUpperCase();
-	}).map(function (v) {
-		return 'I am ' + v;
-	});
-
-	source3$.subscribe(function (x) {
-		return console.log(x);
-	}, function (err) {
-		console.log(err);
-	}, function (complete) {
-		console.log('Completed');
-	});
-
-	var users = [{ name: 'Will', age: 33 }, { name: 'Mike', age: 34 }, { name: 'Paul', age: 35 }];
-
-	var users$ = _Rx2.default.Observable.from(users).pluck('age');
-
-	users$.subscribe(function (x) {
-		return console.log(x);
-	});
-
-	_Rx2.default.Observable.of('Hello').merge(_Rx2.default.Observable.of('Everyone')).subscribe(function (x) {
-		return console.log(x);
-	});
-
-	//Rx.Observable.interval(2000)
-	//	.merge(Rx.Observable.interval(500))
-	//	.take(10)
-	//	.subscribe(x => console.log(x))
-	//;
-	//	
-
-	var source4$ = _Rx2.default.Observable.interval(2000).map(function (v) {
-		return 'Merge1: ' + v;
-	});
-	var source5$ = _Rx2.default.Observable.interval(2000).map(function (v) {
-		return 'Merge2: ' + v;
-	});
-
-	_Rx2.default.Observable.merge(source4$, source5$).take(15).subscribe(function (x) {
-		return console.log(x);
-	});
-
-	var source6$ = _Rx2.default.Observable.range(0, 5).map(function (v) {
-		return 'Range1: ' + v;
-	});
-	var source7$ = _Rx2.default.Observable.range(6, 5).map(function (v) {
-		return 'Range2: ' + v;
-	});
-
-	_Rx2.default.Observable.concat(source6$, source7$).subscribe(function (x) {
-		return console.log(x);
-	});
-
-	_Rx2.default.Observable.of('Hello').subscribe(function (v) {
-		_Rx2.default.Observable.of(v + 'Everyone').subscribe(function (x) {
-			return console.log(v + x);
-		});
-	});
-
-	_Rx2.default.Observable.of('Hello').mergeMap(function (v) {
-		return _Rx2.default.Observable.of(v + 'Everyone');
-	}).subscribe(function (x) {
-		return console.log(x);
-	}); // v is not accessible here
-	;
-
-	// bradtraversy
-
-
-	var inputSource2$ = _Rx2.default.Observable.fromEvent((0, _jquery2.default)('#input'), 'keyup').map(function (e) {
-		return e.target.value;
-	}).switchMap(function (v) {
-		return _Rx2.default.Observable.fromPromise(getUser(v));
-	});
-
-	inputSource2$.subscribe(function (x) {
-		console.log('**********' + x.data.blog);
-		(0, _jquery2.default)('#name').text(x.data.name);
-		(0, _jquery2.default)('#blog').text(x.data.blog);
-		(0, _jquery2.default)('#repos').text('Public Repos : ' + x.data.public_repos);
-	});
+	// var m = print2log();
+	// print2log().log('uuuu....');
 
 /***/ },
 /* 1 */

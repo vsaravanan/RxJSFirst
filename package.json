@@ -2,8 +2,9 @@
   "name": "rxjs-first",
   "version": "1.0.0",
   "description": "Boilerplate for building RxJS applications",
-  "main": "app.js",
+  "main": "index.html",
   "scripts": {
+    "build": "cp src/index.html dist/index.html && webpack -w",
     "start": "live-server --port=8000"
   },
   "author": "Saravanan",
