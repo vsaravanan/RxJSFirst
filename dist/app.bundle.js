@@ -316,7 +316,6 @@
 	});
 
 	inputSource2$.subscribe(function (x) {
-		console.log('**********' + x.data.blog);
 		(0, _jquery2.default)('#name').text(x.data.name);
 		(0, _jquery2.default)('#blog').text(x.data.blog);
 		(0, _jquery2.default)('#repos').text('Public Repos : ' + x.data.public_repos);

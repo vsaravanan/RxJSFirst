@@ -303,7 +303,6 @@ const inputSource2$ = Rx.Observable.fromEvent($('#input'), 'keyup')
 	});
 
 inputSource2$.subscribe(x => {
-		console.log('**********' + x.data.blog);
 		$('#name').text(x.data.name);
 		$('#blog').text(x.data.blog);
 		$('#repos').text('Public Repos : ' + x.data.public_repos);
