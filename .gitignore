@@ -5,6 +5,7 @@ build/
 .idea
 .gradle
 *.iml
+dist
 
 # node.js
 #
